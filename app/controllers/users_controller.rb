@@ -31,6 +31,7 @@ class UsersController < ApplicationController
     else
       redirect_to("/user_sign_up", {:alert => user.errors.full_messages.to_sentence})
     end
+  end
 
     def sign_in
       render({:template => "users/sign_in.html.erb"})
@@ -59,8 +60,6 @@ class UsersController < ApplicationController
       redirect_to("/", {:notice => "See you later"})
     end
 
-    
-  end
 
   def update
     the_id = params.fetch("the_user_id")
