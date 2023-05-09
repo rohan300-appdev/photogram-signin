@@ -5,6 +5,10 @@ class UsersController < ApplicationController
     render({ :template => "users/index.html" })
   end
 
+  def registration_form
+    render({:template => "users/sign_up.html.erb"})
+  end
+
   def show
     the_username = params.fetch("the_username")
     @user = User.where({ :username => the_username }).at(0)
@@ -16,10 +20,46 @@ class UsersController < ApplicationController
     user = User.new
 
     user.username = params.fetch("input_username")
+    user.password = params.fetch("input_password")
+    user.password_confirmation = params.fetch("input_password_conf")
 
-    user.save
+    status = user.save
 
-    redirect_to("/users/#{user.username}")
+    if status == true
+      session.store(:user_id, user.id)
+      redirect_to("/users/#{user.username}", {:notice => "Welcome, " + user.username + "!"})
+    else
+      redirect_to("/user_sign_up", {:alert => user.errors.full_messages.to_sentence})
+    end
+
+    def sign_in
+      render({:template => "users/sign_in.html.erb"})
+    end
+
+    def check
+      un = params.fetch("input_username")
+      pass = params.fetch("input_password")
+
+      user = User.where({:username => un}).at(0)
+
+      if user == nil
+        redirect_to("/user_sign_in", {:alert => "No one by that name 'round these parts"})
+      else
+        if user.authenticate(pass)
+          session.store(:user_id, user.id)
+          redirect_to("/", {:notice => "Welcome back"})
+        else
+          redirect_to("/user_sign_in", {:alert => "Nice try, sucker!"})
+        end
+      end
+    end
+
+    def sign_out
+      reset_session
+      redirect_to("/", {:notice => "See you later"})
+    end
+
+    
   end
 
   def update
